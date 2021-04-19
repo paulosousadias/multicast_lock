@@ -1,5 +1,6 @@
 package cz.analogic.multicastlock;
 
+import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -17,40 +18,74 @@ public class MulticastLockPlugin implements MethodCallHandler {
   private WifiManager.MulticastLock multicastLock;
   private final Activity activity;
 
-  /** Plugin registration. */
-  public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "multicast_lock");
-    channel.setMethodCallHandler(new MulticastLockPlugin(registrar.activity()));
-  }
+  // /** Plugin registration. */
+  // public static void registerWith(Registrar registrar) {
+  //   final MethodChannel channel = new MethodChannel(registrar.messenger(), "multicast_lock");
+  //   channel.setMethodCallHandler(new MulticastLockPlugin(registrar.activity()));
+  // }
 
   private MulticastLockPlugin(Activity activity) {
     this.activity = activity;
   }
 
-  public void onMethodCall(MethodCall call, Result result) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.DONUT) {
-      result.error("UNAVAILABLE", "Obsolete android version", null);
-      return;
-    }
+  // https://flutter.dev/go/android-project-migration
+  @Override
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+      GeneratedPluginRegistrant.registerWith(flutterEngine);
+      new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
+              .setMethodCallHandler(
+                  (call, result) -> {
+                      // Your existing code
+                      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.DONUT) {
+                        result.error("UNAVAILABLE", "Obsolete android version", null);
+                        return;
+                      }
 
-    if (call.method.equals("acquire")) {
-      if(acquire()) {
-        result.success(null);
-      } else {
-        result.error("UNAVAILABLE", "WifiManager not present", null);
-      }
-    } else if (call.method.equals("release")) {
-      if(release()) {
-        result.success(null);
-      } else {
-        result.error("UNAVAILABLE", "Lock is already released", null);
-      }
-    } else if (call.method.equals("isHeld")) {
-      result.success(isHeld());
-    } else {
-      result.notImplemented();
-    }
+                      if (call.method.equals("acquire")) {
+                        if(acquire()) {
+                          result.success(null);
+                        } else {
+                          result.error("UNAVAILABLE", "WifiManager not present", null);
+                        }
+                      } else if (call.method.equals("release")) {
+                        if(release()) {
+                          result.success(null);
+                        } else {
+                          result.error("UNAVAILABLE", "Lock is already released", null);
+                        }
+                      } else if (call.method.equals("isHeld")) {
+                        result.success(isHeld());
+                      } else {
+                        result.notImplemented();
+                      }
+              }
+      );
   }
+
+  // public void onMethodCall(MethodCall call, Result result) {
+  //   if (Build.VERSION.SDK_INT < Build.VERSION_CODES.DONUT) {
+  //     result.error("UNAVAILABLE", "Obsolete android version", null);
+  //     return;
+  //   }
+
+  //   if (call.method.equals("acquire")) {
+  //     if(acquire()) {
+  //       result.success(null);
+  //     } else {
+  //       result.error("UNAVAILABLE", "WifiManager not present", null);
+  //     }
+  //   } else if (call.method.equals("release")) {
+  //     if(release()) {
+  //       result.success(null);
+  //     } else {
+  //       result.error("UNAVAILABLE", "Lock is already released", null);
+  //     }
+  //   } else if (call.method.equals("isHeld")) {
+  //     result.success(isHeld());
+  //   } else {
+  //     result.notImplemented();
+  //   }
+  // }
 
   private boolean acquire() throws NullPointerException
   {
