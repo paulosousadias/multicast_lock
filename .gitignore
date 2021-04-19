@@ -6,3 +6,9 @@
 pubspec.lock
 
 build/
+
+ios/Flutter/flutter_export_environment.sh
+
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+
+.flutter-plugins*
