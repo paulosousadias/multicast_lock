@@ -8,15 +8,14 @@ import 'package:flutter/services.dart';
 /// multicast addresses. Processing these extra packets can cause a noticeable
 /// battery drain and should be disabled when not needed.
 class MulticastLock {
-
   static const MethodChannel _channel = const MethodChannel('multicast_lock');
-  static MulticastLock _instance;
+  static MulticastLock? _instance;
 
   factory MulticastLock() {
     if (_instance == null) {
       _instance = MulticastLock.private();
     }
-    return _instance;
+    return _instance!;
   }
 
   MulticastLock.private();
@@ -33,8 +32,7 @@ class MulticastLock {
 
   /// Checks whether this MulticastLock is currently held.
   Future<bool> isHeld() async {
-    final bool result = await _channel.invokeMethod('isHeld');
-    return result;
+    final bool? result = await _channel.invokeMethod('isHeld');
+    return result ?? false;
   }
 }
-
